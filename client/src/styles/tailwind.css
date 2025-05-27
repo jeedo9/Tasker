@@ -1,1 +1,97 @@
 @import "tailwindcss";
+
+
+@layer base  {
+
+    .dark {
+    --color-primary: oklch(0.6259 0.1641 250.29);
+    --color-tertiary: oklch(0.4036 0.006 271.14);
+    --color-background: oklch(0.2223 0.006 271.14);
+    --color-foreground: var(--color-slate-100);
+    /* --color-border: oklch(0.9417 0.0052 247.88); */
+}
+
+    @theme {
+    --font-curve: cursive;
+    --text-md: .91rem;
+    --color-primary: oklch(0.6259 0.1641 250.29);
+    --color-primary-dark: oklch(0.5679 0.1641 250.29);
+    --color-secondary: oklch(0.9627 0.02 238.66);
+    --color-tertiary: var(--color-slate-200);
+    --color-background: var(--color-slate-100);
+    --color-foreground: var(--color-slate-700);
+    --color-border: oklch(0.9417 0.0052 247.88);
+    --color-destructive: var(--color-red-700);
+    --color-success: var(--color-green-500);
+    --animate-anim: anim 2.9s;
+
+    @keyframes anim {
+        27% {
+            rotate: -3.5deg;
+        }
+
+        57% {
+            rotate: 4.5deg;
+        }
+
+        to {
+            opacity: 0;
+            translate: 0 200px;
+        }
+    }
+}
+
+    body {
+        @apply bg-background text-foreground
+    }
+
+    button {
+        @apply cursor-pointer
+    }
+
+    button:focus-visible {
+        box-shadow: none !important;
+    }
+
+    :focus-visible {
+        outline: 1.5px solid var(--color-primary-dark);
+        outline-offset: 1.5px;
+    }
+
+    label {
+        width: fit-content;
+    }
+
+    ::-webkit-scrollbar-thumb {
+    background-color: var(--color-foreground);
+    cursor: default;
+    border-radius: 1px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background-color: --alpha(var(--color-foreground) / 70%);
+        @supports not (color: color-mix(in oklab, black, tomato)) {
+            background-color: oklch(0.549 0.044 257.287);
+        }
+    }
+
+    ::-webkit-scrollbar {
+        width: .22rem;
+    }
+
+    h1, .logo {
+        @apply text-3xl/relaxed cursor-default select-all text-shadow-sm/20 text-shadow-foreground font-black
+    }
+
+    h2 {
+        @apply md:text-lg text-base font-semibold
+    }
+
+    p {
+        @apply md:text-base text-md
+    }
+
+    h1, .logo, h2 {
+        @apply capitalize tracking-tight
+    }
+}

@@ -1,5 +1,8 @@
+import Layout from "./components/Layout";
+import Index from "./pages/Index/Index";
 
 export default function App() {
-  
-  return <div></div>
+  return <Layout>
+    <Index />
+  </Layout>
 }

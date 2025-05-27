@@ -1,0 +1,1 @@
+export type RemoveS<T extends string> = T extends `${infer K}s` ? K : T
