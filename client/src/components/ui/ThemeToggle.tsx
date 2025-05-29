@@ -1,7 +1,9 @@
-import { BiMoon } from "react-icons/bi";
+import { BiMoon as Moon, BiSun as Sun} from "react-icons/bi";
 import Button from "./Button";
+import useTheme from "../../contexts/theme/useTheme";
 
 const ThemeToggle = () => {
-    return <Button base="secondary" size="sm"><BiMoon size='1.4em' /></Button>
+    const {isDarkMode, toggleTheme} = useTheme()
+    return <Button onClick={toggleTheme} base="secondary" size="sm">{isDarkMode ?  <Sun size='1.4em' /> : <Moon size='1.4em' /> }</Button>
 }
 export default ThemeToggle;
