@@ -1,14 +1,17 @@
 import express from 'express'
 import { exit } from 'node:process'
 import { PORT } from './utils/constants.js'
+import tasksRouter from './routes/tasks.js'
 const app = express()
 
-
 app.disable('x-powered-by')
+
 
 app.get('/', (req, res) => {
     res.contentType('text/plain').send('Hello !')
 })
+app.use(express.json())
+app.use('/tasks', tasksRouter)
 
 app.listen(PORT, (e) => {
     if (e) {
