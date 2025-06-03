@@ -2,7 +2,7 @@
 
 ## Tasker is a simple full stack task app.
 
-Tech Stack ⚡ 
+Tech Stack ⚡            
   Language : TypeScript  
   Frontend -> React - Tailwindcss  
   Backend -> Node - Express  
