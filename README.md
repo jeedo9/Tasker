@@ -1,6 +1,6 @@
 # Tasker📝
 
-Tasker is a simple full stack task app.
+## Tasker is a simple full stack task app.
 
 Tech Stack ⚡ 
   Language : TypeScript  
