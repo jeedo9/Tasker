@@ -3,20 +3,19 @@ import { generateId} from "../utils/helpers.js";
 import { z } from "zod";
 import { errorMessages } from "../utils/constants.js";
 import { Code } from "../types/index.d.js";
-import { type Task} from '../../../shared/types/types.js'
+import {type ITask} from '../../../shared/types/types.js'
 import {type Success, type SuccessOrError, type ErrorType, error, success, type CodeResponse } from "../utils/response.js";
 
+let tasks: ITask[] = [];
 
-// Sould be placed in shared/types.ts
+// Should be placed in shared folder
 export enum Status {
     Pending = 'pending',
     Done = 'done'
 }
 
-let tasks: Task[] = [];
-
-type ResponseTasks = {tasks: Task[]}
-type ResponseTask = {task: Task}
+type ResponseTasks = {tasks: ITask[]}
+type ResponseTask = {task: ITask}
 type TaskIdParam = {
     taskId: string
 }
@@ -39,7 +38,8 @@ export const createTask: RequestHandler<{}, SuccessOrError<Success<Code.Created,
     const bodyParsed = postTaskSchema.safeParse(req.body)
     if (!bodyParsed.success) {
         const {errors} = bodyParsed.error
-        res.status(Code.BadRequest).json(error(400, errors))
+        const errorsObj = Object.fromEntries(errors.map(error => [error.path[0], error.message]))
+        res.status(Code.BadRequest).json(error(400, errorsObj))
         return
     }
     const {data} = bodyParsed
@@ -48,7 +48,7 @@ export const createTask: RequestHandler<{}, SuccessOrError<Success<Code.Created,
         res.status(Code.Conflict).json(error<'create'>(409, errorMessages.conflict))
         return
     }
-    const task = Object.assign<Omit<Task, keyof PostTask>, PostTask>({
+    const task = Object.assign<Omit<ITask, keyof PostTask>, PostTask>({
         id: generateId(),
         status: Status.Pending,
     }, data)
@@ -58,16 +58,16 @@ export const createTask: RequestHandler<{}, SuccessOrError<Success<Code.Created,
 
 export const updateTask: RequestHandler<TaskIdParam, SuccessOrError<Success<Code.OK, ResponseTask>, 'update'>>  = (req, res: Response<SuccessOrError<Success<Code.OK, ResponseTask>, 'update'>, {}, CodeResponse<'update'>>) => {
     const {taskId} = req.params
-    const {body} = req
     const task = tasks.find(task => task.id === taskId)
     if (!task) {
         res.status(Code.NotFound).json(error(Code.NotFound, errorMessages.notFound))
         return
     }
-    const bodyParsed = patchTaskSchema.safeParse(body)
+    const bodyParsed = patchTaskSchema.safeParse(req.body)
     if (!bodyParsed.success) {
         const {errors} = bodyParsed.error
-        res.status(Code.BadRequest).json(error(400, errors))
+        const errorsObj = Object.fromEntries(errors.map(error => [error.path[0], error.message]))
+        res.status(Code.BadRequest).json(error(400, errorsObj))
         return
     }
     const {status} = bodyParsed.data
@@ -81,5 +81,5 @@ export const deleteTask: RequestHandler<TaskIdParam, ErrorType<'delete'>> = (req
     tasks = tasks.filter(task => task.id !== taskId)
     const {length: tasksLengthAfter} = tasks
     if (tasksLengthAfter < tasksLengthBefore) res.sendStatus(Code.NoContent)
-    else res.status(Code.NotFound).json(error<'delete'>(404, ''))
+    else res.status(Code.NotFound).json(error<'delete'>(404, errorMessages.notFound))
 }

@@ -8,7 +8,8 @@
     --color-tertiary: oklch(0.4036 0.006 271.14);
     --color-background: oklch(0.2223 0.006 271.14);
     --color-foreground: var(--color-slate-100);
-    --color-destructive: var(--color-red-600);
+    --color-destructive: var(--color-red-500);
+    --color-success: var(--color-green-400);
     }
 
     @theme {
@@ -22,10 +23,10 @@
     --color-foreground: var(--color-slate-700);
     --color-border: oklch(0.8112 0.0052 234.35 / 96.28%);
     --color-destructive: var(--color-red-700);
-    --color-success: var(--color-green-500);
-    --animate-anim: anim 2.9s;
-
-    @keyframes anim {
+    --color-success: var(--color-green-700);
+    --animate-delete: delete 2.9s;
+    --animate-spin: spin 1s ease-in-out infinite;
+    @keyframes delete {
         27% {
             rotate: -3.5deg;
         }
@@ -61,7 +62,7 @@
     label {
         width: fit-content;
     }
-
+    
     ::-webkit-scrollbar-thumb {
     background-color: var(--color-foreground);
     cursor: default;

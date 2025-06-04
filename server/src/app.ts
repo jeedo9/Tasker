@@ -1,16 +1,18 @@
 import express from 'express'
 import { exit } from 'node:process'
-import { PORT } from './utils/constants.js'
+import { CLIENT_URL, PORT } from './utils/constants.js'
 import tasksRouter from './routes/tasks.js'
+import cors from 'cors'
 const app = express()
 
 app.disable('x-powered-by')
 
-
 app.get('/', (req, res) => {
     res.contentType('text/plain').send('Hello !')
 })
-app.use(express.json())
+app.use(express.json(), cors({
+    origin: CLIENT_URL
+}))
 app.use('/tasks', tasksRouter)
 
 app.listen(PORT, (e) => {

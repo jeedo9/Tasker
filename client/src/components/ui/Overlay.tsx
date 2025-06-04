@@ -1,10 +1,11 @@
 import type { ComponentProps, PropsWithChildren } from "react";
 import cn from "../../utils/helpers";
 
-export type OverlayProps = ComponentProps<'div'> 
-type OverlayProp = OverlayProps & Required<PropsWithChildren>
-const Overlay = ({children, className, ...props}: OverlayProp) => {
-    return <div className={cn("bg-black/55 hidden!  perspective-midrange scale-98 opacity-0 transition duration-250 scale-100 opacity-100 rounded-lg perspective-origin-bottom-right fixed inset-0 flex justify-center items-center", className)} {...props}>
+export type OverlayProps = ComponentProps<'div'> & {
+    isOpen?: boolean
+} & Required<PropsWithChildren> 
+const Overlay = ({children, className, isOpen = true, ...props}: OverlayProps) => {
+    return isOpen && <div className={cn("bg-black/55 perspective-midrange transition duration-250 starting:scale-93 starting:opacity-0 rounded perspective-origin-bottom-right fixed inset-0 flex justify-center items-center", className)} {...props}>
         {children}
     </div>
 }
