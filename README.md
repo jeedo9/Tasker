@@ -7,7 +7,4 @@ Tech Stack ⚡
   Frontend -> React - Tailwindcss  
   Backend -> Node - Express  
 
-You can run apps by the following bash commands (you can use also an other package manager tool if you want) :  
-  Frontend -> cd client && pnpm i && pnpm dev  
-  Backend -> cd server && pnpm i && pnpm dev  
-
+You can run apps by the following bash command (you can also use an other package manager tool if you want) : pnpm dev (or npm run dev or yarn dev or bun dev)
