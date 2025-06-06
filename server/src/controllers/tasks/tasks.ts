@@ -1,41 +1,25 @@
 import type {Response, RequestHandler} from "express-serve-static-core";
-import { generateId} from "../utils/helpers.js";
-import { z } from "zod";
-import { errorMessages } from "../utils/constants.js";
-import { Code } from "../types/index.d.js";
-import {type ITask} from '../../../shared/types/types.js'
-import {type Success, type SuccessOrError, type ErrorType, error, success, type CodeResponse } from "../utils/response.js";
+import { generateId} from "@utils/helpers.js";
+import { errorMessages } from "@utils/constants.js";
+import { Code } from "@shared/types/types.js";
+import type {ResponseTasks, ResponseTask, TaskContent, ITask, Success} from "@shared/types/types.js"
+import { Status } from "@shared/types/types.js";
+import {type SuccessOrError, type ErrorType, error, success, type CodeResponse } from "@utils/response.js";
+import {createTaskSchema} from '@shared/validators/schemas.js'
+import { patchTaskSchema } from "./tasks.validators.js";
 
-let tasks: ITask[] = [];
-
-// Should be placed in shared folder
-export enum Status {
-    Pending = 'pending',
-    Done = 'done'
-}
-
-type ResponseTasks = {tasks: ITask[]}
-type ResponseTask = {task: ITask}
 type TaskIdParam = {
     taskId: string
 }
 
-const postTaskSchema = z.strictObject({
-    title: z.string({message: 'A title is required to create your task'}).min(2, 'Title field should be at least 2 characters please'),
-    description: z.string().optional()
-})
+let tasks: ITask[] = [];
 
-type PostTask = z.infer<typeof postTaskSchema>
-
-const patchTaskSchema = z.object({
-    status: z.enum([Status.Pending, Status.Done])
-}).strict('You can only update the status of your task.')
 
 export const getTasks: RequestHandler<{}, Success<Code.OK, ResponseTasks>> = (_, res: Response<Success<Code.OK, ResponseTasks>, {}, CodeResponse<'read'>>) => {res.json(success(Code.OK, {tasks}))}
 
 export const createTask: RequestHandler<{}, SuccessOrError<Success<Code.Created, ResponseTask>, 'create'>>  = (req, res: Response<SuccessOrError<Success<Code.Created, ResponseTask>, 'create'>, {}, CodeResponse<'create'>>) => {
 
-    const bodyParsed = postTaskSchema.safeParse(req.body)
+    const bodyParsed = createTaskSchema.safeParse(req.body)
     if (!bodyParsed.success) {
         const {errors} = bodyParsed.error
         const errorsObj = Object.fromEntries(errors.map(error => [error.path[0], error.message]))
@@ -48,7 +32,7 @@ export const createTask: RequestHandler<{}, SuccessOrError<Success<Code.Created,
         res.status(Code.Conflict).json(error<'create'>(409, errorMessages.conflict))
         return
     }
-    const task = Object.assign<Omit<ITask, keyof PostTask>, PostTask>({
+    const task = Object.assign<Omit<ITask, keyof TaskContent>, TaskContent>({
         id: generateId(),
         status: Status.Pending,
     }, data)

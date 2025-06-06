@@ -1,11 +1,11 @@
 {
   "name": "tasker-server",
   "version": "1.0.0",
-  "main": "dist/src/app.js",
+  "main": "dist/server/src/app.js",
   "type": "module",
   "scripts": {
     "dev": "tsx --watch --env-file=.env src/app.ts",
-    "start": "node dist/src/app.js",
+    "start": "node dist/server/src/app.js ",
     "build": "tsc",
     "lint": "eslint .",
     "lint:fix": "eslint --fix ."

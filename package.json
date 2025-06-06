@@ -1,0 +1,22 @@
+{
+  "name": "Tasker",
+  "version": "1.0.0",
+  "type": "module",
+"scripts": {
+"client": "pnpm --prefix ./client dev",
+"server": "pnpm --prefix ./server dev",
+"dev": "concurrently \"pnpm run client\" \"pnpm run server\" --kill-others"
+},
+  "keywords": [
+    "Tasker",
+    "Full stack task app"
+  ],
+  "license": "ISC",
+  "packageManager": "pnpm@10.6.5",
+  "dependencies": {
+    "zod": "^3.25.53"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}

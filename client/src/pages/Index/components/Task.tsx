@@ -1,8 +1,8 @@
 import { BiCheck as Check, BiTrash as Trash} from "react-icons/bi";
-import Button from "../../../components/ui/Button";
-import cn from "../../../utils/helpers";
-import type { ITask} from "../../../../../shared/types/types";
-import { Status } from "../../../../../shared/types/types";
+import Button from "@components/ui/Button";
+import cn from "@utils/helpers";
+import type { ITask} from "@shared/types/types";
+import { Status } from "@shared/types/types";
 import clsx from "clsx";
 import { useState } from "react";
 
@@ -11,6 +11,7 @@ type TaskProps = {
     onDelete: (taskId: ITask['id']) => Promise<boolean | void>,
     onUpdate: (taskId: ITask['id']) => Promise<void>
 } & ITask
+
 const Task = ({className,onUpdate, onDelete, id, title, description, status}: TaskProps) => {
     const [isDeleting, setIsDeleting] = useState(false)
     const handleDelete = async () => {

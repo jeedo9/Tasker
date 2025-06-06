@@ -18,13 +18,3 @@ export type CRUDCode = {
 }
 export type CRUD = keyof CRUDCode
 export type CRUDAccess<T extends CRUD, K extends keyof CRUDCode[T]> = CRUDCode[T][K]
-
-export enum Code {
-    OK = 200,
-    Created = 201,
-    NoContent = 204,
-    BadRequest = 400,
-    NotFound = 404,
-    Conflict = 409,
-    Failure = 500
-}

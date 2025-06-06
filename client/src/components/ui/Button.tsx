@@ -1,6 +1,6 @@
 import type { ComponentProps } from "react";
-import type {RemoveS} from '../../../../shared/types/types'
-import cn from "../../utils/helpers";
+import type {RemoveS} from '@shared/types/types'
+import cn from "@utils/helpers";
 
 const buttonVariants = {
     bases: {

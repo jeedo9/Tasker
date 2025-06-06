@@ -1,6 +1,6 @@
 import type { ComponentProps } from "react";
-import cn from "../../utils/helpers";
-import type { RemoveChildren } from "../../types";
+import cn from "@utils/helpers";
+import type { RemoveChildren } from "@typings/."
 import ErrorMsg, { type ErrorMsgProps } from "./ErrorMsg";
 
 type InputProps = RemoveChildren<ComponentProps<'input'>> & {

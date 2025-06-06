@@ -1,5 +1,5 @@
 import type { ComponentProps, PropsWithChildren } from "react";
-import cn from "../../utils/helpers";
+import cn from "@utils/helpers";
 
 export type OverlayProps = ComponentProps<'div'> & {
     isOpen?: boolean

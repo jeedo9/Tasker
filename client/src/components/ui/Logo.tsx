@@ -1,6 +1,6 @@
 import type { ComponentProps } from "react";
 import clsx from "clsx";
-import type { RemoveChildren } from "../../types";
+import type { RemoveChildren } from "@typings/.";
 
 type LogoProps = RemoveChildren<ComponentProps<'h1'>> & {
     as?: 'h1' | 'h2'

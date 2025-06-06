@@ -1,10 +1,13 @@
 import { useState, type FormEvent } from "react"
-import Button from "../../../components/ui/Button"
-import Input from "../../../components/ui/Input"
-import Modal, { type ModalProps } from "../../../components/ui/Modal"
-import Textarea from "../../../components/ui/Textarea"
-import type { TaskContent } from "../../../../../shared/types/types"
-import {z} from 'zod'
+import Button from "@components/ui/Button"
+import Input from "@components/ui/Input"
+import Modal, { type ModalProps } from "@components/ui/Modal"
+import Textarea from "@components/ui/Textarea"
+import type { TaskContent } from "@shared/types/types"
+import {titleTaskSchema} from '@shared/validators/schemas'
+import { toast } from "sonner"
+
+
 type PostTaskModalProps = Omit<ModalProps, 'title'> & {
   onClose: () => void,
   form : {
@@ -15,17 +18,14 @@ type PostTaskModalProps = Omit<ModalProps, 'title'> & {
   }
 }
 
-const postTaskSchema = z.strictObject({
-    title: z.string({message: 'A title is required to create your task'}).min(2, 'Title field should be at least 2 characters please'),
-    description: z.string().optional()
-})
-
-
 const PostTaskModal = ({description, onClose,form : {onTaskSubmit, taskExists, onChange, resetFields}, ...props}: PostTaskModalProps) => {
     const [titleError, setTitleError] = useState('')
     const onSubmit = (ev: FormEvent<HTMLFormElement>) => {
       ev.preventDefault()
-      if (titleError) return
+      if (titleError){
+         toast.error('Fix the title of your task before create it')
+         return
+      }
       onTaskSubmit()
       resetFields()
     }
@@ -39,8 +39,8 @@ const PostTaskModal = ({description, onClose,form : {onTaskSubmit, taskExists, o
         <fieldset className="flex flex-col gap-y-2">
             <label htmlFor="title">Title<span className="ml-1 text-destructive" >*</span></label>
             <Input onBlur={({target: {value: title}}) => {
-              const titleParsed = postTaskSchema.shape.title.safeParse(title)
-              if (!titleParsed.success) setTitleError(titleParsed.error.errors[0].message)
+              const titleParsed = titleTaskSchema.safeParse(title)
+              if (!titleParsed.success && titleParsed.error.errors[0]) setTitleError(titleParsed.error.errors[0].message)
               else if (taskExists(title)) setTitleError('This task is already in your list.')
               else setTitleError('')
             }} onChange={({target: {value: title}}) => {onChange({title})}} placeholder="Task title" error={{message: titleError, className: 'normal-case'}} id="title" required />

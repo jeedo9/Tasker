@@ -1,8 +1,9 @@
 import express from 'express'
 import { exit } from 'node:process'
-import { CLIENT_URL, PORT } from './utils/constants.js'
-import tasksRouter from './routes/tasks.js'
+import { CLIENT_URL, PORT } from '@utils/constants.js'
+import tasksRouter from '@routes/tasks.js'
 import cors from 'cors'
+
 const app = express()
 
 app.disable('x-powered-by')
@@ -15,7 +16,7 @@ app.use(express.json(), cors({
 }))
 app.use('/tasks', tasksRouter)
 
-app.listen(PORT, (e) => {
+app.listen(PORT, e => {
     if (e) {
         console.error(e.message)
         process.exitCode = 1

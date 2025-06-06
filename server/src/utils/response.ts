@@ -1,4 +1,5 @@
-import { Code, type CRUD, type CRUDAccess } from "../types/index.d.js"
+import {type CRUD, type CRUDAccess } from "@typings/index.d.js"
+import { Code } from "@shared/types/types.js"
 
 
 export const success = <T extends number, K extends Record<string, unknown>>(status: T, data: K) => ({
@@ -33,8 +34,3 @@ export function error(status: AllErrorCodes, errorsOrMessage: Record<string, str
 }
 
 export type SuccessOrError<T extends SuccessReturnType, K extends CRUD> = T | ErrorType<K>
-export type Success<T extends SuccessReturnType['status'], K extends SuccessReturnType['data']> = {
-    status: T,
-    data: K,
-    success: true
-}

@@ -1,17 +1,16 @@
 import {useCallback, useEffect, useState } from "react";
-import Button from "../../components/ui/Button";
+import Button from "@components/ui/Button";
 import PostTaskModal from "./components/PostTaskModal";
 import Task from "./components/Task";
-import api from "../../utils/api";
-import type { ITask, TaskContent } from "../../../../shared/types/types";
-import useModal from "../../contexts/modal/useModal";
-import { Status } from "../../../../shared/types/types";
+import api from "@utils/api";
+import type { ITask, ResponseTask, ResponseTasks, TaskContent, Success } from "@shared/types/types";
+import useModal from "@contexts/modal/useModal";
+import { Status, Code } from "@shared/types/types";
 import { toast } from "sonner";
 import { AxiosError } from "axios";
-import Spinner from "../../components/ui/Spinner";
+import Spinner from "@components/ui/Spinner";
 
 
-// Should create services/tasks.ts file to store the tasks api logic (for reusability but also to keep the page clean and smaller)
 const Index = () => {
   const [tasks, setTasks] = useState<ITask[]>([])
     const [form, setForm] = useState<TaskContent>({
@@ -23,7 +22,7 @@ const Index = () => {
     useEffect(() => {
       async function getTasks() {
         try {
-            const {data: {data: {tasks}}} = await api.get<{data: {tasks: ITask[]}}>('/tasks')
+            const {data: {data: {tasks}}} = await api.get<Success<Code.OK, ResponseTasks>>('/tasks')
             setTasks(tasks)
         } catch (error) {
           console.error(error)
@@ -45,7 +44,7 @@ const Index = () => {
 
     const onTaskSubmit = useCallback(async () => {
         try {
-          const {data: {data: {task}}} = await api.post<{data: {task: ITask}}>('/tasks', form)
+          const {data: {data: {task}}} = await api.post<Success<Code.Created, ResponseTask>>('/tasks', form)
           setTasks(tasks => [...tasks, task])
           setModal(null)
           toast.success('You have a new task : ' + task.title)
@@ -56,10 +55,10 @@ const Index = () => {
 
     }, [form, setModal])
 
-    const onDelete = async (taskId: ITask['id']) => {
+    const onDelete = async (taskId: ITask['id']): Promise<boolean | void> => {
       try {
-        const fetchDelete = await api.delete('/tasks/' + taskId)
-        if (fetchDelete.status === 204) {
+        const fetchDelete = await api.delete<Success<Code.NoContent, {}>>('/tasks/' + taskId)
+        if (fetchDelete.status === Code.NoContent) {
           const taskIndex = tasks.findIndex(task => task.id === taskId)
           if (taskIndex === -1) throw new Error('Cannot find this task.')
           else {
@@ -73,7 +72,7 @@ const Index = () => {
           console.error(error)
           if (error instanceof AxiosError && error.status) {
             // const errorTyped = error as AxiosError<{message: string, status: 404, success: false} | {errors: Record<string, string>, status: 400, success: false}>
-            if (error.status > 400 && error.status < 500) {
+            if (error.status > Code.BadRequest && error.status < Code.Failure) {
               toast.error(error.response?.data.message)
               return
             }
@@ -91,13 +90,13 @@ const Index = () => {
       const body = {
         status
       }
-      const {data: {data: {task: taskUpdated}}} = await api.patch<{data: {task: ITask}}>('/tasks/' + taskId, body)
+      const {data: {data: {task: taskUpdated}}} = await api.patch<Success<Code.OK, ResponseTask>>('/tasks/' + taskId, body)
       task.status = taskUpdated.status
       setTasks([...tasks])
       } catch (error) {
           console.error(error)
           if (error instanceof AxiosError && error.status) {
-            if (error.status > 400 && error.status < 500) {
+            if (error.status > Code.BadRequest && error.status < Code.Failure) {
               toast.error(error.response?.data.message)
               return
             }

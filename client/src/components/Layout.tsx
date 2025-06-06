@@ -1,6 +1,6 @@
 import type { ComponentProps } from "react";
 import Header, { type HeaderProps } from "./Header";
-import cn from "../utils/helpers";
+import cn from "@utils/helpers";
 
 type LayoutProps = ComponentProps<'div'> & {header?: HeaderProps}
 const Layout = ({header, className, children, ...props}: LayoutProps) => {

@@ -1,7 +1,7 @@
 import type { ComponentProps } from "react";
-import cn from "../../utils/helpers";
+import cn from "@utils/helpers";
 import Overlay, { type OverlayProps } from "./Overlay";
-import useModal from "../../contexts/modal/useModal";
+import useModal from "@contexts/modal/useModal";
 
 export type ModalProps = ComponentProps<'div'> & {
     title: string,
