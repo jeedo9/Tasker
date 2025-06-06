@@ -50,6 +50,10 @@
         @apply cursor-pointer
     }
 
+    html {
+        touch-action: pan-y;
+    }
+
     button:focus-visible {
         box-shadow: none !important;
     }

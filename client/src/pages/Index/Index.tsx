@@ -112,7 +112,7 @@ const Index = () => {
     }, [setModal, onTaskSubmit,taskExists, isModalOpen])
 
     if (isLoading) return <Spinner />
-    return  <main className="w-11/12 flex flex-col justify-center items-center gap-y-7">
+    return  <main className="w-11/12 mb-14 flex flex-col justify-center items-center gap-y-7">
       {!tasks.length ? <h3 className="text-xl font-bold text-primary-dark tracking-wide flex flex-col justify-center items-center gap-y-1 cursor-default hover:text-primary">Create your first task<span role="img">&#x2B07;</span></h3> : tasks.map(task => <Task key={task.id} onDelete={onDelete} onUpdate={onUpdate} {...task} />
        )}
     <Button onClick={() => setModal(<PostTaskModal onClose={() => setModal(null)} form={{onTaskSubmit,resetFields: () => setForm({title: '', description: ''}),taskExists, onChange: setFormField}} />)} size="lg" className="font-curve" aria-expanded="false" aria-haspopup="dialog" aria-controls="modal">new task</Button>
