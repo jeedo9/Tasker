@@ -8,12 +8,12 @@ import {type SuccessOrError, type ErrorType, error, success, type CodeResponse }
 import {createTaskSchema} from '@shared/validators/schemas.js'
 import { patchTaskSchema } from "./tasks.validators.js";
 
+
 type TaskIdParam = {
     taskId: string
 }
 
 let tasks: ITask[] = [];
-
 
 export const getTasks: RequestHandler<{}, Success<Code.OK, ResponseTasks>> = (_, res: Response<Success<Code.OK, ResponseTasks>, {}, CodeResponse<'read'>>) => {res.json(success(Code.OK, {tasks}))}
 
@@ -23,13 +23,13 @@ export const createTask: RequestHandler<{}, SuccessOrError<Success<Code.Created,
     if (!bodyParsed.success) {
         const {errors} = bodyParsed.error
         const errorsObj = Object.fromEntries(errors.map(error => [error.path[0], error.message]))
-        res.status(Code.BadRequest).json(error(400, errorsObj))
+        res.status(Code.BadRequest).json(error(Code.BadRequest, errorsObj))
         return
     }
     const {data} = bodyParsed
     const taskExists = tasks.some(task => task.title === data.title)
     if (taskExists) {
-        res.status(Code.Conflict).json(error<'create'>(409, errorMessages.conflict))
+        res.status(Code.Conflict).json(error<'create'>(Code.Conflict, errorMessages.conflict))
         return
     }
     const task = Object.assign<Omit<ITask, keyof TaskContent>, TaskContent>({
@@ -51,13 +51,20 @@ export const updateTask: RequestHandler<TaskIdParam, SuccessOrError<Success<Code
     if (!bodyParsed.success) {
         const {errors} = bodyParsed.error
         const errorsObj = Object.fromEntries(errors.map(error => [error.path[0], error.message]))
-        res.status(Code.BadRequest).json(error(400, errorsObj))
+        res.status(Code.BadRequest).json(error(Code.BadRequest, errorsObj))
         return
     }
-    const {status} = bodyParsed.data
-    task.status = status
+    const {data: updatedData} = bodyParsed
+    const taskExits = tasks.some(task => task.title === updatedData.title)
+    if (taskExits) {
+        res.status(Code.Conflict).json(error(Code.Conflict, 'You cannot update your task with the same title or with a title already used by another task'))
+        return
+    }
+    // Verify if updatedData has field(s) that have not been changed ...
+    Object.assign(task, updatedData)
     res.json(success(Code.OK, {task}))
 }
+
 
 export const deleteTask: RequestHandler<TaskIdParam, ErrorType<'delete'>> = (req, res: Response<ErrorType<'delete'>, {}, CodeResponse<'delete'>>) => {
     const {taskId} = req.params
@@ -65,5 +72,10 @@ export const deleteTask: RequestHandler<TaskIdParam, ErrorType<'delete'>> = (req
     tasks = tasks.filter(task => task.id !== taskId)
     const {length: tasksLengthAfter} = tasks
     if (tasksLengthAfter < tasksLengthBefore) res.sendStatus(Code.NoContent)
-    else res.status(Code.NotFound).json(error<'delete'>(404, errorMessages.notFound))
+    else res.status(Code.NotFound).json(error<'delete'>(Code.NotFound, errorMessages.notFound))
+}
+
+export const deleteTasks: RequestHandler<TaskIdParam, ErrorType<'delete'>>  = (req, res: Response<ErrorType<'delete'>, {}, CodeResponse<'delete'>>) => {
+    tasks = [];
+    res.sendStatus(Code.NoContent)
 }

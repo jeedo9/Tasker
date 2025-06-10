@@ -1,3 +1,4 @@
+import { Code } from "@shared/types/types.ts"
 export type CRUDCode = {
     create: {
         success: Code.Created,

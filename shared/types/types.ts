@@ -1,4 +1,4 @@
-import type { SuccessReturnType } from "../../server/src/utils/response"
+import type { SuccessReturnType } from "../../server/src/utils/response.js"
 
 export enum Status {
     Pending = 'pending',
