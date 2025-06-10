@@ -4,6 +4,6 @@ import useTheme from "@contexts/theme/useTheme";
 
 const ThemeToggle = () => {
     const {isDarkMode, toggleTheme} = useTheme()
-    return <Button onClick={toggleTheme} base="secondary" size="sm">{isDarkMode ?  <Sun size='1.4em' aria-label="sun" /> : <Moon size='1.4em' aria-label="moon" /> }</Button>
+    return <Button onClick={toggleTheme} base="secondary" size="sm">{isDarkMode ?  <Sun size='1.4em' aria-label="sun" /> : <Moon size='1.4em' aria-label="moon" className="rotate-6" /> }</Button>
 }
 export default ThemeToggle;
