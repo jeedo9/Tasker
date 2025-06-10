@@ -1,6 +1,6 @@
 import type { ComponentProps } from "react";
 import cn from "@utils/helpers";
-import ErrorMsg, { type ErrorMsgProps } from "./ErrorMsg";
+import ErrorMsg, { type ErrorMsgProps } from "../ErrorMsg";
 
 type TextareaProps = ComponentProps<'textarea'> & {
     error?: ErrorMsgProps
