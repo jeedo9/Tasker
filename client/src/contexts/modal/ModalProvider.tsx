@@ -1,11 +1,21 @@
-import { useState, type PropsWithChildren, type ReactElement } from "react";
+import { useState, type PropsWithChildren } from "react";
 import { ModalContext } from "./useModal";
 
 
 type ModalContextProviderProps = PropsWithChildren 
+export type ModalsName = 'taskUpdate' | 'taskCreate'
+
 const ModalProvider = ({children}: ModalContextProviderProps) => {
-    const [modal, setModal] = useState<ReactElement | null>(null)
-    const isModalOpen = modal !== null
+    const [modals, setModals] = useState<Record<ModalsName, boolean>>({
+        taskUpdate: false,
+        taskCreate: false
+    })
+
+    const setModal = (modalName: ModalsName, open: boolean) => {
+        setModals({...modals, [modalName]: open})
+    }
+
+    const isModalOpen = (modalName: ModalsName) => modals[modalName]
 
     const value = {
         isModalOpen,
@@ -13,7 +23,6 @@ const ModalProvider = ({children}: ModalContextProviderProps) => {
     }
     return <ModalContext.Provider value={value}>
         {children}
-        {modal}
     </ModalContext.Provider>
 }
 

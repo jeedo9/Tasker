@@ -1,9 +1,10 @@
-import { use, type Dispatch, type ReactElement, type SetStateAction } from "react"
+import { use } from "react"
 import { createContext } from "react"
+import type { ModalsName } from "./ModalProvider"
 
 type ModalContextType = {
-    setModal: Dispatch<SetStateAction<ReactElement | null>>,
-    isModalOpen: boolean
+    setModal: (modalName: ModalsName, open: boolean) => void,
+    isModalOpen: (modalName: ModalsName) => boolean
 } | null
 export const ModalContext = createContext<ModalContextType>(null)
 
