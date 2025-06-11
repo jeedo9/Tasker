@@ -13,7 +13,7 @@ type TaskProps = {
     onDelete: (taskId: ITask['id']) => Promise<boolean | void>,
     onUpdate: (taskId: ITask['id']) => Promise<void>,
     taskModal: Omit<TaskModalProps<'update'>, 'type' | 'form'> & {
-      form: (Omit<TaskModalProps<'update'>['form'], 'onTaskSubmit'>) & {onTaskSubmit: (taskId: ITask['id']) => Promise<void>}
+      form: (Omit<TaskModalProps<'update'>['form'], 'onTaskSubmit'>) & {onTaskSubmit: (taskId: ITask['id'], signal: {signal: AbortSignal}) => Promise<void>}
     }
 } & ITask
 
@@ -36,9 +36,9 @@ const Task = ({className,onUpdate, onDelete, id, title, description, status, tas
       setOpenModal(false)
     }
 
-    const handleTaskSubmit = async (): Promise<void> => {
+    const handleTaskSubmit = async (signal: {signal: AbortSignal}) => {
       try {
-        await onTaskSubmit(id)
+        await onTaskSubmit(id, signal)
         setOpenModal(false)
       } catch (error) {}
     }

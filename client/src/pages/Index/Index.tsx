@@ -45,37 +45,39 @@ const Index = () => {
 
 
 
-    const onCreateTaskSubmit = async () => {
+    const onCreateTaskSubmit = async (signal: {signal: AbortSignal}) => {
         try {
-          const {data: {data: {task}}} = await api.post<Success<Code.Created, ResponseTask>>('/tasks', form)
+          const {data: {data: {task}}} = await api.post<Success<Code.Created, ResponseTask>>('/tasks', form, signal)
           setTasks(tasks => [...tasks, task])
           setModal('taskCreate', false)
           toast.success('You have a new task : ' + task.title)
         } catch (error) {
           console.error(error)
-          toast.error('Task creation failed..')
+          if (error instanceof AxiosError && error.code === AxiosError.ERR_CANCELED) toast.info('Action cancelled')
+          else toast.error('Task creation failed..')
           throw error
         }
     }
 
-
-    console.log(formUpdate)
-
-    const onUpdateTaskSubmit = async (taskId: ITask['id']) => {
+    const onUpdateTaskSubmit = async (taskId: ITask['id'], signal: {signal: AbortSignal}) => {
         try {
           const task = tasks.find(task => task.id === taskId)
           if (!task) throw new Error('Task not found.')
-          const {data: {data: {task: taskUpdated}}} = await api.patch<Success<Code.OK, ResponseTask>>('/tasks/' + taskId, formUpdate)
+          const {data: {data: {task: taskUpdated}}} = await api.patch<Success<Code.OK, ResponseTask>>('/tasks/' + taskId, formUpdate, signal)
           Object.assign(task, taskUpdated)
           setTasks([...tasks])
           toast.success('Task updated successfully !')
           setModal('taskUpdate', false)
         } catch (error) {
           console.error(error)
-          if (error instanceof AxiosError && error.status) {
+          if (error instanceof AxiosError) {
             // const errorTyped = error as AxiosError<{message: string, status: 404, success: false} | {errors: Record<string, string>, status: 400, success: false}>
-            if (error.status > Code.BadRequest && error.status < Code.Failure) {
+            if (error.status && error.status > Code.BadRequest && error.status < Code.Failure) {
               toast.error(error.response?.data.message)
+              throw error
+            }
+            else if (error.code === AxiosError.ERR_CANCELED) {
+              toast.info('Action cancelled')
               throw error
             }
           }
@@ -162,7 +164,6 @@ const Index = () => {
     const resetFormFields = () => setForm({title: '', description: ''})
 
     const resetUpdateFormFields = () => setFormUpdate({})
-
 
 
     return  <main className="w-11/12 mb-14 flex flex-col justify-center items-center gap-y-7">

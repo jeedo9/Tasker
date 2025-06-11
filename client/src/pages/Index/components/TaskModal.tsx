@@ -11,7 +11,7 @@ import Checkbox from "@components/ui/form/Checkbox"
 export type TaskModalProps<T extends 'update' | 'create'> = Omit<ModalProps, 'title'> & {
   onClose?: () => void,
   form : {
-    onTaskSubmit: () => Promise<void>
+    onTaskSubmit: (signal: {signal: AbortSignal}) => Promise<void>
     onChange: T extends 'update' ? (field: Partial<TaskContent & Pick<ITask, 'status'>> |  keyof (TaskContent & Pick<ITask, 'status'>), remove?: boolean) => void : (field: Partial<TaskContent>) => void,
     taskExists?: (taskTitle: string) => boolean,
     resetFields: () => void,
@@ -42,6 +42,10 @@ const TaskModal = <T extends 'update' | 'create'>({description,type = 'create', 
     })
     const [isLoading, setIsLoading] = useState(false)
 
+    const abortController = useMemo(() =>  new AbortController(), [])
+    const signal = abortController.signal
+
+
     const onSubmit = async (ev: FormEvent<HTMLFormElement>) => {
       ev.preventDefault()
       if (titleError){
@@ -50,7 +54,7 @@ const TaskModal = <T extends 'update' | 'create'>({description,type = 'create', 
       }
       try {
           setIsLoading(true)
-          await onTaskSubmit()
+          await onTaskSubmit({signal})
           resetFields()
       }
       finally {
@@ -60,7 +64,14 @@ const TaskModal = <T extends 'update' | 'create'>({description,type = 'create', 
     const handleOnClose = () => {
         onClose?.()
         resetFields()
+        abortController.abort()
     }
+
+    useEffect(() => {
+      return () => {
+        if (signal.aborted) abortController.abort()
+      }
+    }, [])
 
     useEffect(() => {
       if (type === 'update' && task) setForm(task)

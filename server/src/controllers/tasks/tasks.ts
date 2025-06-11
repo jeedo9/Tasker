@@ -15,7 +15,10 @@ type TaskIdParam = {
 
 let tasks: ITask[] = [];
 
-export const getTasks: RequestHandler<{}, Success<Code.OK, ResponseTasks>> = (_, res: Response<Success<Code.OK, ResponseTasks>, {}, CodeResponse<'read'>>) => {res.json(success(Code.OK, {tasks}))}
+export const getTasks: RequestHandler<{}, Success<Code.OK, ResponseTasks>> = (_, res: Response<Success<Code.OK, ResponseTasks>, {}, CodeResponse<'read'>>) => {
+    tasks.sort((a, b) => b.status.length - a.status.length)
+    res.json(success(Code.OK, {tasks}))
+}
 
 export const createTask: RequestHandler<{}, SuccessOrError<Success<Code.Created, ResponseTask>, 'create'>>  = (req, res: Response<SuccessOrError<Success<Code.Created, ResponseTask>, 'create'>, {}, CodeResponse<'create'>>) => {
 
