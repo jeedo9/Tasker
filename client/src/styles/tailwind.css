@@ -26,6 +26,7 @@
     --color-success: var(--color-green-700);
     --animate-delete: delete 2.9s;
     --animate-spin: spin 1s ease-in-out infinite;
+    
     @keyframes delete {
         27% {
             rotate: -3.5deg;

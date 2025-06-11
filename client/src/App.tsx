@@ -1,6 +1,6 @@
-import Layout from "./components/Layout";
+import Layout from "@components/Layout";
 import { Toaster } from "sonner";
-import Index from "./pages/Index/Index";
+import Index from "@pages/Index/Index";
 import useTheme from "@contexts/theme/useTheme";
 
 export default function App() {

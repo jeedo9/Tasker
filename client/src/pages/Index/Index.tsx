@@ -166,7 +166,7 @@ const Index = () => {
     const resetUpdateFormFields = () => setFormUpdate({})
 
 
-    return  <main className="w-11/12 mb-14 flex flex-col justify-center items-center gap-y-7">
+    return  <main className="xl:w-[72%] w-11/12 mb-14 flex flex-col justify-center items-center gap-y-7">
       {
         isLoading ? <Spinner />  : !tasks.length ? <h3 className="text-xl font-bold text-primary-dark tracking-wide flex flex-col justify-center items-center gap-y-1 cursor-default hover:text-primary">Create your first task<span role="img">&#x2B07;</span></h3> :
       <div className="w-full flex flex-col justify-center items-end gap-y-6">
