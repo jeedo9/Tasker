@@ -1,5 +1,5 @@
 import {type CRUD, type CRUDAccess } from "@typings/index.d.js"
-import { Code } from "@shared/types/types.js"
+import { Code, type ErrorMessage } from "@shared/types/types.js"
 
 
 export const success = <T extends number, K extends Record<string, unknown>>(status: T, data: K) => ({
@@ -8,21 +8,22 @@ export const success = <T extends number, K extends Record<string, unknown>>(sta
     data
 })
 
-type ErrorSuccess = {
+export type ErrorSuccess = {
      success: false
 }
 
-export type Error400ReturnType = {status: Code.BadRequest, errors: Record<string, string>} & ErrorSuccess
+export type Error400 = {status: Code.BadRequest, errors: Record<string, string>} & ErrorSuccess
+
 export type SuccessReturnType = ReturnType<typeof success>
 
-export type ErrorType<T extends CRUD> = ((Code.BadRequest extends CRUDAccess<T, 'error'> ? Error400ReturnType : never) | {status: Exclude<CRUDAccess<T, 'error'>, Code.BadRequest>, message: string}) & ErrorSuccess
+export type ErrorType<T extends CRUD> = ((Code.BadRequest extends CRUDAccess<T, 'error'> ? Error400 : never) | ErrorMessage<T>) & ErrorSuccess
 
 export type CodeResponse<T extends CRUD> = CRUDAccess<T, 'error'> | CRUDAccess<T, 'success'>
 
 type AllErrorCodes = CRUDAccess<CRUD, 'error'>
 
 
-export function error(status: Code.BadRequest, errors: Record<string, string>): Error400ReturnType
+export function error(status: Code.BadRequest, errors: Record<string, string>): Error400
 export function error<K extends CRUD>(status: Exclude<CRUDAccess<K, 'error'>, Code.BadRequest>, message: string): ErrorType<K>
 
 export function error(status: AllErrorCodes, errorsOrMessage: Record<string, string> | string) {

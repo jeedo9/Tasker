@@ -63,7 +63,7 @@ export const updateTask: RequestHandler<TaskIdParam, SuccessOrError<Success<Code
         res.status(Code.Conflict).json(error(Code.Conflict, 'You cannot update your task with the same title or with a title already used by another task'))
         return
     }
-    // Verify if updatedData has field(s) that have not been changed ...
+    // Verify if updatedData has field(s) that have not been changed and send a message (No changes detected)...
     Object.assign(task, updatedData)
     res.json(success(Code.OK, {task}))
 }

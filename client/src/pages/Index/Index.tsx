@@ -1,41 +1,34 @@
-import {useCallback, useEffect, useState } from "react";
+import {useEffect, useState } from "react";
 import Button from "@components/ui/Button";
 import TaskModal from "./components/TaskModal";
 import Task from "./components/Task";
-import api from "@utils/api";
-import type { ITask, ResponseTask, ResponseTasks, TaskContent, Success } from "@shared/types/types";
+import { Status, type ITask, type TaskContent, type TaskInfo, type TaskInfoOptional} from "@shared/types/types";
 import useModal from "@contexts/modal/useModal";
-import { Status, Code } from "@shared/types/types";
-import { toast } from "sonner";
-import { AxiosError } from "axios";
 import Spinner from "@components/ui/Spinner";
 import { BiTrash as Trash} from "react-icons/bi";
-
+import {deleteTasks, deleteTask, createTask, updateTask, getTasks} from "./services/tasks";
 
 const Index = () => {
   const [tasks, setTasks] = useState<ITask[]>([])
-    const [form, setForm] = useState<TaskContent>({
+  const [form, setForm] = useState<TaskContent>({
       title: '',
       description: ''
     })
-    const [formUpdate, setFormUpdate] = useState<Partial<TaskContent & Pick<ITask, 'status'>>>({})
+  const [formUpdate, setFormUpdate] = useState<TaskInfoOptional>({})
   const {setModal, isModalOpen} = useModal()
   const [isLoading, setIsLoading] = useState(true)
 
     useEffect(() => {
-      async function getTasks() {
-        try {
-            const {data: {data: {tasks}}} = await api.get<Success<Code.OK, ResponseTasks>>('/tasks')
-            setTasks(tasks)
-        } catch (error) {
-          console.error(error)
-          toast.error('Cannot get your tasks.. Try refresh Tasker.')
-        }
-        finally {
+      async function getAllTasks() {
+          const tasks = await getTasks()
+          if (!tasks) {
+            setIsLoading(false)
+            return
+          }
+          setTasks(tasks)
           setIsLoading(false)
-        }
       }
-      getTasks()
+      getAllTasks()
     }, [])
 
     const taskExists = (taskTitle: string) => {
@@ -43,140 +36,80 @@ const Index = () => {
       return exists
     }
 
-
-
     const onCreateTaskSubmit = async (signal: {signal: AbortSignal}) => {
-        try {
-          const {data: {data: {task}}} = await api.post<Success<Code.Created, ResponseTask>>('/tasks', form, signal)
-          setTasks(tasks => [...tasks, task])
-          setModal('taskCreate', false)
-          toast.success('You have a new task : ' + task.title)
-        } catch (error) {
-          console.error(error)
-          if (error instanceof AxiosError && error.code === AxiosError.ERR_CANCELED) toast.info('Action cancelled')
-          else toast.error('Task creation failed..')
-          throw error
-        }
+          const newTask = await createTask(form, signal)
+          if (!newTask) return false
+          setTasks(tasks => [...tasks, newTask])
+          return true
     }
 
     const onUpdateTaskSubmit = async (taskId: ITask['id'], signal: {signal: AbortSignal}) => {
-        try {
-          const task = tasks.find(task => task.id === taskId)
-          if (!task) throw new Error('Task not found.')
-          const {data: {data: {task: taskUpdated}}} = await api.patch<Success<Code.OK, ResponseTask>>('/tasks/' + taskId, formUpdate, signal)
+          const taskUpdated = await updateTask(taskId, tasks, formUpdate, signal)
+          if (!taskUpdated) return false
+          const task = tasks.find(task => task.id === taskId)!
           Object.assign(task, taskUpdated)
           setTasks([...tasks])
-          toast.success('Task updated successfully !')
-          setModal('taskUpdate', false)
-        } catch (error) {
-          console.error(error)
-          if (error instanceof AxiosError) {
-            // const errorTyped = error as AxiosError<{message: string, status: 404, success: false} | {errors: Record<string, string>, status: 400, success: false}>
-            if (error.status && error.status > Code.BadRequest && error.status < Code.Failure) {
-              toast.error(error.response?.data.message)
-              throw error
-            }
-            else if (error.code === AxiosError.ERR_CANCELED) {
-              toast.info('Action cancelled')
-              throw error
-            }
-          }
-          toast.error('Task update failed..')
-          throw error
-        }
+          return true
     }
 
-    const onDelete = async (taskId: ITask['id']): Promise<boolean | void> => {
-      try {
-        const task = tasks.find(task => task.id === taskId)
-        if (!task) throw new Error('Task not found.')
-        const fetchDelete = await api.delete<Success<Code.NoContent, {}>>('/tasks/' + taskId)
-        if (fetchDelete.status === Code.NoContent) {
+    const onDelete = async (taskId: ITask['id']) => {
+        const deleted = await deleteTask(taskId, tasks)
+        if (deleted) {
+          console.log('yes')
           const taskIndex = tasks.findIndex(task => task.id === taskId)
-          if (taskIndex === -1) throw new Error('Cannot find this task.')
-          else {
-            tasks.splice(taskIndex, 1)
-            const animationDuration = 2900
-            setTimeout(() => setTasks([...tasks]), animationDuration)
-            return true
-          }
+
+          tasks.splice(taskIndex, 1)
+          const animationDuration = 2900
+          setTimeout(() => setTasks([...tasks]), animationDuration)
         }
-      } catch (error) {
-          console.error(error)
-          if (error instanceof AxiosError && error.status) {
-            // const errorTyped = error as AxiosError<{message: string, status: 404, success: false} | {errors: Record<string, string>, status: 400, success: false}>
-            if (error.status > Code.BadRequest && error.status < Code.Failure) {
-              toast.error(error.response?.data.message)
-              return
-            }
-          }
-          toast.error('Task deletion failed..')
-      }
-      }
+        return Boolean(deleted)
+  }
     
 
-    const onUpdate = async (taskId: ITask['id']) => {
-      try {
-      const task = tasks.find(task => task.id === taskId)
-      if (!task) throw new Error('Task not found.')
-      const status = task.status === Status.Pending ? Status.Done : Status.Pending
+    const onUpdate = async (taskId: ITask['id'], status: ITask['status']) => {
       const body = {
-        status
+        status: status === Status.Done ? Status.Pending : Status.Done
       }
-      const {data: {data: {task: taskUpdated}}} = await api.patch<Success<Code.OK, ResponseTask>>('/tasks/' + taskId, body)
+      const taskUpdated = await updateTask(taskId, tasks, body)
+      if (!taskUpdated) return
+      const task = tasks.find(task => task.id === taskId)!
       task.status = taskUpdated.status
       setTasks([...tasks])
-      } catch (error) {
-          console.error(error)
-          if (error instanceof AxiosError && error.status) {
-            if (error.status > Code.BadRequest && error.status < Code.Failure) {
-              toast.error(error.response?.data.message)
-              return
-            }
-          }
-          toast.error('Task update failed..')
-      }
     }
 
-    const deleteTasks = async () => {
-      try {
-        await api.delete<Success<Code.NoContent, {}>>('/tasks')
-        setTasks([])
-      } catch (error) {
-          console.error(error)
-          toast.error('Tasks deletion failed..')
-      }
+    const onDeleteTasks = async () => {
+        const deleted = await deleteTasks()
+        if (deleted) setTasks([])
     }
 
-    const setFormField = useCallback((field: Partial<TaskContent>) => setForm(prev => ({...prev, ...field})), [])
+    const setFormField = (field: Partial<TaskContent>) => setForm(prev => ({...prev, ...field}))
 
-    const setUpdateFormField = useCallback((field: Partial<TaskContent & Pick<ITask, 'status'>> | keyof (TaskContent & Pick<ITask, 'status'>), remove?: boolean) => {
+    const setUpdateFormField = (field: TaskInfoOptional | keyof TaskInfo, remove?: boolean) => {
        setFormUpdate(form => {
         if (remove && typeof field === 'string') {
           delete form[field]
           return form
         }
-        else return {...form, ...field as Partial<TaskContent & Pick<ITask, 'status'>>}
+        else return {...form, ...field as TaskInfoOptional}
        }
       )
-    }, [])
-
+    }
+    
     const resetFormFields = () => setForm({title: '', description: ''})
 
     const resetUpdateFormFields = () => setFormUpdate({})
 
-
     return  <main className="xl:w-[72%] w-11/12 mb-14 flex flex-col justify-center items-center gap-y-7">
       {
-        isLoading ? <Spinner />  : !tasks.length ? <h3 className="text-xl font-bold text-primary-dark tracking-wide flex flex-col justify-center items-center gap-y-1 cursor-default hover:text-primary">Create your first task<span role="img">&#x2B07;</span></h3> :
+        isLoading ? <Spinner />  : !tasks.length ? <h3 className="text-xl lg:text-2xl font-bold text-primary-dark tracking-wide flex flex-col justify-center items-center gap-y-1 cursor-default hover:text-primary">Create your first task<span role="img">&#x2B07;</span></h3> :
       <div className="w-full flex flex-col justify-center items-end gap-y-6">
          {tasks.sort((a, b) => b.status.length - a.status.length).map(task => <Task key={task.id} onDelete={onDelete} onUpdate={onUpdate} taskModal={{form: {onTaskSubmit: onUpdateTaskSubmit, resetFields: resetUpdateFormFields, onChange: setUpdateFormField}, onClose: () => setModal('taskUpdate', false)}} {...task} />
        )}
-       <Button className="mr-0.5 rounded-md" onClick={deleteTasks} size="sm" base="destructive"><Trash strokeWidth={.7} size='1.1em' /></Button>
+       <Button className="mr-0.5 rounded-md" onClick={onDeleteTasks} size="sm" base="destructive"><Trash strokeWidth={.7} size='1.1em' /></Button>
       </div>
 }
 {!isLoading && <Button onClick={() => setModal('taskCreate', true)} size="lg" className="font-curve" aria-expanded="false" aria-haspopup="dialog" aria-controls="modal">new task</Button>}
-{isModalOpen('taskCreate') && <TaskModal onClose={() => setModal('taskCreate', false)} form={{onTaskSubmit: onCreateTaskSubmit, resetFields: resetFormFields, taskExists, onChange: setFormField}} />}
+{isModalOpen('taskCreate') && <TaskModal<'create'> type="create" onClose={() => setModal('taskCreate', false)} form={{onTaskSubmit: onCreateTaskSubmit, resetFields: resetFormFields, taskExists, onChange: setFormField}} />}
   </main>
 }
 export default Index;

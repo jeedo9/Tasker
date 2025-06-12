@@ -10,10 +10,10 @@ import TaskModal, { type TaskModalProps } from "./TaskModal";
 
 type TaskProps = {
     className?: string,
-    onDelete: (taskId: ITask['id']) => Promise<boolean | void>,
-    onUpdate: (taskId: ITask['id']) => Promise<void>,
+    onDelete: (taskId: ITask['id']) => Promise<boolean>,
+    onUpdate: (taskId: ITask['id'], status: ITask['status']) => Promise<void>,
     taskModal: Omit<TaskModalProps<'update'>, 'type' | 'form'> & {
-      form: (Omit<TaskModalProps<'update'>['form'], 'onTaskSubmit'>) & {onTaskSubmit: (taskId: ITask['id'], signal: {signal: AbortSignal}) => Promise<void>}
+      form: (Omit<TaskModalProps<'update'>['form'], 'onTaskSubmit'>) & {onTaskSubmit: (taskId: ITask['id'], signal: {signal: AbortSignal}) => Promise<boolean>}
     }
 } & ITask
 
@@ -37,10 +37,9 @@ const Task = ({className,onUpdate, onDelete, id, title, description, status, tas
     }
 
     const handleTaskSubmit = async (signal: {signal: AbortSignal}) => {
-      try {
-        await onTaskSubmit(id, signal)
-        setOpenModal(false)
-      } catch (error) {}
+        const success = await onTaskSubmit(id, signal)
+        if (success) setOpenModal(false)
+        return success
     }
 
       const task = useMemo(() => ({status, title, description}), [status, title, description])
@@ -50,10 +49,10 @@ const Task = ({className,onUpdate, onDelete, id, title, description, status, tas
           <p className="wrap-anywhere">{description}</p>
         </div>
         <div className="flex gap-x-2 text-xl absolute right-4 sm:right-5 [&>button]:rounded-xs [&>button]:hover:opacity-70 [&>button]:active:scale-92 [&>button]:transition">
-          <Button onClick={() => onUpdate(id)} noStyle><Check aria-label="check" className={clsx(status === Status.Done && 'text-success')} /></Button>
+          <Button onClick={() => onUpdate(id, status)} noStyle><Check aria-label="check" className={clsx(status === Status.Done && 'text-success')} /></Button>
           <Button onClick={handleDelete} noStyle><Trash aria-label="trash" className="text-destructive" /></Button>
         </div>
-      {status === Status.Pending && <div className="bg-gradient-to-t -z-10 group-hover:z-0 from-tertiary translate-x-1/2 from-62% to-border group-hover:border-b-transparent group-hover:from-55% group-hover:from-tertiary/85 transition-all duration-250 absolute bottom-[81.3%] transform-gpu group-hover:-translate-y-[1.2rem] group-hover:delay-200 rounded-b-xs right-8 w-10 rounded-sm flex justify-center [border-width:inherit] items-center h-6.5">
+      {status === Status.Pending && <div className="bg-gradient-to-t -z-10 rounded-b-[.07rem] border-b-0 group-hover:z-0 from-tertiary translate-x-1/2 from-62% to-border group-hover:border-b-transparent dark:group-hover:from-62% group-hover:from-55% group-hover:from-tertiary/85 transition-all duration-250 absolute bottom-[81.3%] transform-gpu group-hover:-translate-y-[1.2rem] group-hover:delay-200 right-8 w-10 rounded-sm flex justify-center [border-width:inherit] items-center h-6.5">
           <Button onClick={handleOnClickUpdate} noStyle><Pencil/></Button>
 
         </div>}
